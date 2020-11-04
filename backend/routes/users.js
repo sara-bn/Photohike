@@ -7,6 +7,7 @@ const config = require('config');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
+
 // @route    POST api/users
 // @desc     Register user
 // @access   Public
@@ -15,10 +16,14 @@ router.post('/', [
     check(
     'password',
     'Please enter a password with 6 or more characters'
-    ).isLength({ min: 6 })
+    ).isLength({ min: 6 }),
+    check(
+        'username',
+        'username is required').not().isEmpty(),
+
 ],  async (req, res) => {
 
-    const {email, password } = req.body;
+    const {email, password, username } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -26,8 +31,9 @@ router.post('/', [
 
     try {
         let userWithSameEmail = await User.findOne({ email });
+        let userWithSameUsername = await User.findOne({ username });
 
-        if (userWithSameEmail) {
+        if (userWithSameEmail || userWithSameUsername ) {
         return res
             .status(400)
             .json({ errors: [{ msg: 'User already exists' }] });
@@ -35,7 +41,8 @@ router.post('/', [
         
         user = new User({
         email,
-        password
+        password,
+        username
         });
 
         const salt = await bcrypt.genSalt(10);
