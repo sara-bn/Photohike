@@ -36,7 +36,6 @@ router.post('/', [auth, [check('caption', 'Caption is required').not().isEmpty()
 // @desc     Get all posts
 // @access   Public
 router.get('/', async (req, res) => {
-    console.log(req.user);
 	try {
 		//sort posts by data
 		const posts = await Post.find().sort({ date: -1 });
@@ -74,7 +73,7 @@ router.delete('/:id', auth, async (req, res) => {
 			}
 
 			// Check user
-			if (post.user.toString() !== req.user.id) {
+			if (post.userId.toString() !== req.user.id) {
 				return res.status(401).json({ msg: 'User not authorized' });
 			}
 
