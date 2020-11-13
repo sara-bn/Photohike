@@ -5,6 +5,25 @@ const auth = require('../middleware/auth')
 const User = require('../models/User');
 const Post = require('../models/Post');
 
+
+// @route    GET api/posts
+// @desc     Get all posts
+// @access   Public
+router.get('/allposts', async (req, res) => {
+	var page=req.query.page;
+	var limit=req.query.take;
+	try {
+			var limit = parseInt(limit);
+			var skip = (parseInt(page)-1) * parseInt(limit);
+			const measurements = await Post.find().sort({ date: -1 }).skip(skip).limit(limit);
+            res.json(measurements);
+            
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server Error');
+	}
+});
+
 // @route    POST api/posts
 // @desc     add post
 // @access   Private
@@ -33,33 +52,23 @@ router.post('/', [auth, [check('caption', 'Caption is required').not().isEmpty()
 );
 
 // @route    GET api/posts
-// @desc     Get all posts
-// @access   Public
-router.get('/', async (req, res) => {
-	try {
-		//sort posts by data
-		const posts = await Post.find().sort({ date: -1 });
-		res.json(posts);
-	} catch (err) {
-		console.error(err.message);
-		res.status(500).send('Server Error');
-	}
-});
-
-// @route    GetByUserId api/posts/:id
-// @desc     Get all posts from a user
+// @desc     Get all posts for specific user
 // @access   Private
-router.get('/myposts', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
+	var page=req.query.page;
+	var limit=req.query.take;
 	try {
-			const posts = await Post.find({userId:req.user.id});
-            res.json(posts);
+			var limit = parseInt(limit);
+			var skip = (parseInt(page)-1) * parseInt(limit);
+			const measurements = await Post.find({userId:req.user.id}).sort({ date: -1 }).skip(skip).limit(limit);
+            res.json(measurements);
             
 	} catch (err) {
 		console.error(err.message);
-
 		res.status(500).send('Server Error');
 	}
 });
+
 
 // @route    DELETE api/posts/:id
 // @desc     Delete a post
