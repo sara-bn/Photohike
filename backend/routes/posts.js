@@ -16,7 +16,11 @@ router.get('/allposts', async (req, res) => {
 			var limit = parseInt(limit);
 			var skip = (parseInt(page)-1) * parseInt(limit);
 			const measurements = await Post.find().sort({ date: -1 }).skip(skip).limit(limit);
-            res.json(measurements);
+			const totalBodyMeasurmetns = await Post.find();
+			res.json({
+				"total": totalBodyMeasurmetns.length,
+				"data": measurements
+			});
             
 	} catch (err) {
 		console.error(err.message);
